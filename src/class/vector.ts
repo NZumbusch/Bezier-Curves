@@ -84,9 +84,9 @@ export default class Vector {
 
 
     static crossProduct (v1: Vector, v2: Vector): Vector {
-        let pointOne = v1.getValues()[2] * v2.getValues()[3] - v1.getValues()[3] * v2.getValues()[2];
-        let pointTwo = v1.getValues()[3] * v2.getValues()[1] - v1.getValues()[1] * v2.getValues()[3];
-        let pointThree = v1.getValues()[1] * v2.getValues()[2] - v1.getValues()[2] * v2.getValues()[1];
+        let pointOne = v1.getValues()[1] * v2.getValues()[2] - v1.getValues()[2] * v2.getValues()[1];
+        let pointTwo = v1.getValues()[2] * v2.getValues()[0] - v1.getValues()[0] * v2.getValues()[2];
+        let pointThree = v1.getValues()[0] * v2.getValues()[1] - v1.getValues()[1] * v2.getValues()[0];
 
         return new Vector(pointOne, pointTwo, pointThree);
     }
