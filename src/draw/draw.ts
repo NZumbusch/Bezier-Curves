@@ -55,7 +55,8 @@ export default class Draw {
         Get stuff for canvas and convert points to 2d canvas
         */
         let canvasNormalVector = Vector.crossProduct(canvasVectorOne, canvasVectorTwo);
-        let canvasPositionalVector = Vector.scalarMultiplyVector( // Positional Vector or middle of canvas
+        // Positional Vector or middle of canvas
+        let canvasPositionalVector = Vector.scalarMultiplyVector( 
             canvasDistance / Vector.getAbsolute(canvasNormalVector), 
             Vector.addVectors(Vector.getVectorFromPoint(cameraPosition), canvasNormalVector)
         );
@@ -71,8 +72,37 @@ export default class Draw {
                 let straightTwo = new Straight(new Vector(point.pos[0], point.pos[1], point.pos[2]), canvasVectorTwo);
                 
 
+                console.log(straightOne, straightTwo);
+                let sCut = Straight.straightCutStraight(straightOne, straightTwo);
+                if (sCut === false || sCut === true) {
+                    throw new Error("Draw:saveBezierCurve no cut point, how is that even possible?")
+                }
+                let cutPoint = sCut.v;
+                let cutR = sCut.r; // vertical
+                let cutS = sCut.s; // horizontal
 
-                // this.drawCircle(context, point.x, point.y, point.radius, point.color, point.color, point.radius / 2)
+
+
+                // calculate horizontal offset
+                let horizontalDimension = Vector.getAbsolute(Vector.subtractVectors(Vector.getVectorFromPoint(cutPoint), straightOne.getSupportVector()));
+                if (cutR < 0) {
+                    horizontalDimension *= -1; // invert as the absolute cannot be negative
+                } else if (cutR === 0) {
+                    horizontalDimension = 0;
+                }
+
+
+                // calculate vertical offset
+                let verticalDimension = Vector.getAbsolute(Vector.subtractVectors(Vector.getVectorFromPoint(cutPoint), straightTwo.getSupportVector()));
+                if (cutS < 0) {
+                    verticalDimension *= -1; // invert as the absolute cannot be negative
+                } else if (cutS === 0) {
+                    verticalDimension = 0;
+                }
+
+
+                // draw point
+                this.drawCircle(context, horizontalDimension, verticalDimension, point.radius, point.color, point.color, point.radius / 2)
             }
         })
 
