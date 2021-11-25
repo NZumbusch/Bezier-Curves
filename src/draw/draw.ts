@@ -29,7 +29,7 @@ export default class Draw {
 
 
 
-    saveBezierCurveImage (definitionPoints: Point[], elementPoints: Point[], cameraPosition: Point = new Point(0, 0, 0), canvasDistance: number = 100, canvasVectorOne: Vector = new Vector(0, 0, 1), canvasVectorTwo: Vector = new Vector(1, 0, 0)) {
+    saveBezierCurveImage (definitionPoints: Point[], elementPoints: Point[], cameraPosition: Point = new Point(0, 0, 0), canvasDistance: number = 100, canvasVectorOne: Vector = new Vector(0, 0, 1), canvasVectorTwo: Vector = new Vector(1, 0, 0)): void {
         this.canvas = createCanvas(this.width, this.height);
 
         let context = this.canvas.getContext("2d");
@@ -63,16 +63,19 @@ export default class Draw {
         let canvasPlane = new Plane(canvasPositionalVector, canvasNormalVector);
 
 
-
         let straightOne = new Straight(canvasPositionalVector, canvasVectorOne); // Vector from positional vector in width direction
         points.forEach((point, index) => {
-            let straight = Straight.getStraightFromPoints(cameraPosition, new Point(point.pos[0], point.pos[2], point.pos[1]));
-            let pointOnCanvas = Plane.planeStraightCollision(canvasPlane, straight);
-            if (pointOnCanvas !== true && pointOnCanvas !== false) {
-                let straightTwo = new Straight(new Vector(point.pos[0], point.pos[1], point.pos[2]), canvasVectorTwo);
-                
+            // Straight from camera through point
+            let straight = Straight.getStraightFromPoints(cameraPosition, new Point(point.pos[0], point.pos[1], point.pos[2]));
 
-                console.log(straightOne, straightTwo);
+            // projecting point over camera on plane: collision point of the plane and the straight
+            let pointOnCanvas = Plane.planeStraightCollision(canvasPlane, straight);
+
+            if (pointOnCanvas !== true && pointOnCanvas !== false) {
+                // straight from collision point (projected) in direction of second directional vector of plane
+                let straightTwo = new Straight(new Vector(pointOnCanvas.getPosition()[0], pointOnCanvas.getPosition()[1], pointOnCanvas.getPosition()[2]), canvasVectorTwo);
+
+
                 let sCut = Straight.straightCutStraight(straightOne, straightTwo);
                 if (sCut === false || sCut === true) {
                     throw new Error("Draw:saveBezierCurve no cut point, how is that even possible?")
@@ -102,7 +105,7 @@ export default class Draw {
 
 
                 // draw point
-                this.drawCircle(context, horizontalDimension, verticalDimension, point.radius, point.color, point.color, point.radius / 2)
+                this.drawCircle(context, horizontalDimension, verticalDimension + this.height , point.radius, point.color, point.color, point.radius / 2)
             }
         })
 
@@ -116,7 +119,40 @@ export default class Draw {
 
 
 
-   private drawCircle (ctx: NodeCanvasRenderingContext2D, x: number, y: number, radius: number, fill: string, stroke: string, strokeWidth: number) {
+
+    saveBezierCurve2D (definitionPoints: Point[], elementPoints: Point[]): void {
+        this.canvas = createCanvas(this.width, this.height);
+
+        let context = this.canvas.getContext("2d");
+
+        context.fillStyle = '#000';
+        context.fillRect(0, 0, this.width, this.width);
+
+
+        let points: point[] = [];
+        definitionPoints.forEach((point, index) => {
+            points.push({pos: point.getPosition(), radius: 6, color: "#12b886"})
+        })
+        elementPoints.forEach((point, index) => {
+            points.push({pos: point.getPosition(), radius: 3, color: "#be4bdb"})
+        })
+
+
+        points.forEach((point, index) => {
+            // draw point
+            this.drawCircle(context, point.pos[0], point.pos[2], point.radius, point.color, point.color, point.radius / 2);
+        });
+
+
+        // Save image
+        let buffer = this.canvas.toBuffer('image/png')
+        fs.writeFileSync('./image.png', buffer)
+    }
+
+
+
+
+    private drawCircle (ctx: NodeCanvasRenderingContext2D, x: number, y: number, radius: number, fill: string, stroke: string, strokeWidth: number): void {
         ctx.beginPath()
         ctx.arc(x, y, radius, 0, 2 * Math.PI, false)
         if (fill) {

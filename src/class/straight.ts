@@ -17,6 +17,16 @@ export default class Straight {
     }
 
 
+
+    roundSupportVector (precision: number) {
+        this.supportVector.setPointOneTo(Math.round(this.supportVector.getValues()[0] * Math.pow(10, precision)) / Math.pow(10, precision));
+        this.supportVector.setPointTwoTo(Math.round(this.supportVector.getValues()[1] * Math.pow(10, precision)) / Math.pow(10, precision));
+        this.supportVector.setPointThreeTo(Math.round(this.supportVector.getValues()[2] * Math.pow(10, precision)) / Math.pow(10, precision));
+    }
+
+
+
+
     static getStraightFromPoints (p1: Point, p2: Point): Straight {
         return new Straight(
             Vector.getVectorFromPoint(p1),
@@ -29,9 +39,18 @@ export default class Straight {
 
 
 
-    static straightCutStraight (s1: Straight, s2: Straight): {v: Point, r: number, s: number} | boolean {
+
+    static straightCutStraight (s1: Straight, s2: Straight, precision: number = 5): {v: Point, r: number, s: number} | boolean {
         let r: number | boolean = false; // s1
         let s: number | boolean = false; // s2
+
+
+        // round to prevent things like 9.9999999999999999 instead of 10 breaking it
+        s1.roundSupportVector(precision);
+        s2.roundSupportVector(precision);
+
+
+
 
         // Test if some value is 0 and if then set the corresponding variable to the right value, testing for other parts later
         for (let i = 0; i < 3; i++) {
